@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="matrix_green">#00FF41</color>
+    <color name="bg_dark">#0A0A0A</color>
+    <color name="bg_card">#0D1117</color>
+    <color name="surface_dark">#161B22</color>
+    <color name="text_primary">#E6EDF3</color>
+    <color name="text_secondary">#8B949E</color>
+</resources>
