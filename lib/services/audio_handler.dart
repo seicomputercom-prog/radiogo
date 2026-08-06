@@ -22,14 +22,14 @@ class RadioGoAudioHandler extends BaseAudioHandler with SeekHandler {
   Future<void> playStation(RadioStation station) async {
     _currentStation = station;
 
-    final mediaItem = MediaItem(
+    final newItem = MediaItem(
       id: station.streamUrl,
       title: station.name,
       artist: station.country,
       artUri: station.favicon.isNotEmpty ? Uri.parse(station.favicon) : null,
     );
 
-    this.item.add(mediaItem);
+    mediaItem.add(newItem);
     playbackState.add(playbackState.value.copyWith(
       playing: true,
       processingState: AudioProcessingState.loading,
@@ -144,8 +144,11 @@ class RadioGoAudioHandler extends BaseAudioHandler with SeekHandler {
     return _player.playbackEventStream
         .map((_) {
           final meta = _player.icyMetadata;
-          if (meta == null || meta.headers == null) return null;
-          return meta.headers!['icy-title'] as String?;
+          if (meta == null) return null;
+          final info = meta.headers?.info;
+          if (info == null) return null;
+          final streamTitle = info['StreamTitle'] ?? info['icy-title'];
+          return streamTitle;
         })
         .where((title) => title != null);
   }
