@@ -29,7 +29,7 @@ class RadioGoAudioHandler extends BaseAudioHandler with SeekHandler {
       artUri: station.favicon.isNotEmpty ? Uri.parse(station.favicon) : null,
     );
 
-    item.add(mediaItem);
+    this.item.add(mediaItem);
     playbackState.add(playbackState.value.copyWith(
       playing: true,
       processingState: AudioProcessingState.loading,
@@ -144,8 +144,8 @@ class RadioGoAudioHandler extends BaseAudioHandler with SeekHandler {
     return _player.playbackEventStream
         .map((_) {
           final meta = _player.icyMetadata;
-          if (meta == null) return null;
-          return meta.headers['icy-title'] as String?;
+          if (meta == null || meta.headers == null) return null;
+          return meta.headers!['icy-title'] as String?;
         })
         .where((title) => title != null);
   }
