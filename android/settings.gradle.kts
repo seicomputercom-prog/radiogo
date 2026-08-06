@@ -9,7 +9,7 @@ pluginManagement {
             ?: System.getenv("FLUTTER_ROOT")
             ?: error("flutter.sdk not set in local.properties or FLUTTER_ROOT env")
     }
-    includeBuild("$flutterSdkPath/packages/flutter-tools/gradle")
+    includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
     repositories {
         google()
         mavenCentral()
