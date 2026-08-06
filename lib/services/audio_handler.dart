@@ -142,13 +142,11 @@ class RadioGoAudioHandler extends BaseAudioHandler with SeekHandler {
   /// This listens to the just_audio player's icy metadata stream.
   Stream<String?> get icyMetadataStream {
     return _player.playbackEventStream
-        .map((_) {
+        .map<String?>((_) {
           final meta = _player.icyMetadata;
-          if (meta == null) return null;
-          final info = meta.headers?.info;
-          if (info == null) return null;
-          final streamTitle = info['StreamTitle'] ?? info['icy-title'];
-          return streamTitle;
+          if (meta == null || meta.headers == null) return null;
+          final h = meta.headers!;
+          return h.description ?? h.name;
         })
         .where((title) => title != null);
   }
