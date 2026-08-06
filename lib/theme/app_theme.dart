@@ -6,7 +6,6 @@ class AppTheme {
     return ThemeData(
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.background,
-      backgroundColor: AppColors.background,
       primaryColor: AppColors.accentGreen,
       colorScheme: const ColorScheme.dark(
         primary: AppColors.accentGreen,
@@ -26,14 +25,6 @@ class AppTheme {
           fontFamily: 'Orbitron',
           fontWeight: FontWeight.bold,
           letterSpacing: 2,
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1),
-          child: Divider(
-            height: 1,
-            color: AppColors.accentGreen,
-            thickness: 1,
-          ),
         ),
         iconTheme: IconThemeData(color: AppColors.accentGreen),
       ),

@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
@@ -13,10 +12,5 @@ Future<void> main() async {
   await Hive.openBox('recent');
   await Hive.openBox('settings');
   await Hive.openBox('cache');
-  runApp(
-    GetMaterialApp(
-      initialBinding: InitialBinding(),
-      app: const App(),
-    ),
-  );
+  runApp(const App());
 }

@@ -429,8 +429,8 @@ class PlayerScreen extends GetView<PlayerController> {
               color: AppColors.accentGreen.withAlpha(
                 (80 * glowIntensity).round().clamp(10, 80),
               ),
-              blurRadius: (20 * glowIntensity).round().clamp(4, 25),
-              spreadRadius: (4 * glowIntensity).round().clamp(0, 6),
+              blurRadius: (20 * glowIntensity).round().clamp(4, 25).toDouble(),
+              spreadRadius: (4 * glowIntensity).round().clamp(0, 6).toDouble(),
             ),
           ],
         ),

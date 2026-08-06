@@ -374,7 +374,7 @@ class _MatrixRainWidgetState extends State<MatrixRainWidget> {
   void _initDrops() {
     _drops.clear();
     for (int i = 0; i < _columnCount; i++) {
-      _drops.add(_random.nextInt(-20));
+      _drops.add(-_random.nextInt(20));
     }
   }
 
@@ -383,7 +383,7 @@ class _MatrixRainWidgetState extends State<MatrixRainWidget> {
     setState(() {
       for (int i = 0; i < _drops.length; i++) {
         if (_drops[i] > 60) {
-          _drops[i] = _random.nextInt(-10);
+          _drops[i] = -_random.nextInt(10);
         } else {
           _drops[i] += 1;
         }

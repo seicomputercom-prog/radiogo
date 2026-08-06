@@ -116,14 +116,15 @@ class _MarqueeWidgetState extends State<MarqueeWidget>
                 -(_textWidth + widget.startPadding) * _controller.value,
                 0,
               ),
-              child: Text(
-                widget.text,
-                style: widget.style,
-                maxLines: widget.maxLines,
-                softWrap: false,
-              ),
+              child: child,
             );
           },
+          child: Text(
+            widget.text,
+            style: widget.style,
+            maxLines: widget.maxLines,
+            softWrap: false,
+          ),
         );
       },
     );
@@ -137,28 +138,9 @@ class _MarqueeWidgetState extends State<MarqueeWidget>
   }
 }
 
-/// An animated builder that rebuilds on every frame.
-class AnimatedBuilder extends StatelessWidget {
-  final Animation<double> animation;
-  final Widget Function(BuildContext, Widget?) builder;
-  final Widget? child;
+/// Re-export Flutter's built-in AnimatedBuilder for convenience.
+/// (Removed the custom wrapper that referenced the non-existent AnimatedBuilderImpl.)
 
-  const AnimatedBuilder({
-    super.key,
-    required this.animation,
-    required this.builder,
-    this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilderImpl(
-      listenable: animation,
-      builder: builder,
-      child: child,
-    );
-  }
-}
 
 /// A simpler marquee using ListView for smooth scrolling.
 class SimpleMarquee extends StatefulWidget {

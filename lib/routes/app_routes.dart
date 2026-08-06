@@ -29,7 +29,7 @@ abstract class AppRoutes {
       page: () => const HomeScreen(),
       binding: PlayerBinding(),
     ),
-    GetPage(name: stations, page: () => const StationsScreen()),
+    GetPage(name: stations, page: () => StationsScreen()),
     GetPage(name: search, page: () => const SearchScreen()),
     GetPage(name: favorites, page: () => const FavoritesScreen()),
     GetPage(name: settings, page: () => const SettingsScreen()),

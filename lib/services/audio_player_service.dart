@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:get/get.dart';
 import '../models/radio_station.dart';
 import '../services/audio_handler.dart';

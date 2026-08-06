@@ -27,14 +27,3 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-    - assets/data/
-
-  fonts:
-    - family: ShareTechMono
-      fonts:
-        - asset: assets/fonts/ShareTechMono-Regular.ttf
-    - family: Orbitron
-      fonts:
-        - asset: assets/fonts/Orbitron-Regular.ttf
-        - asset: assets/fonts/Orbitron-Bold.ttf
-          weight: 700

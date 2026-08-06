@@ -155,7 +155,7 @@ class _MatrixRainBackgroundState extends State<_MatrixRainBackground> {
   void initState() {
     super.initState();
     for (int i = 0; i < _columns; i++) {
-      _drops.add(_random.nextInt(-30));
+      _drops.add(-_random.nextInt(30));
     }
     _startAnimation();
   }
@@ -167,7 +167,7 @@ class _MatrixRainBackgroundState extends State<_MatrixRainBackground> {
       setState(() {
         for (int i = 0; i < _drops.length; i++) {
           if (_drops[i] > 60) {
-            _drops[i] = _random.nextInt(-15);
+            _drops[i] = -_random.nextInt(15);
           } else {
             _drops[i] += 1;
           }

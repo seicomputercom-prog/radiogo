@@ -72,7 +72,7 @@ class HomeScreen extends GetView<MainController> {
             Expanded(
               child: IndexedStack(
                 index: controller.currentIndex.value,
-                children: const [
+                children: [
                   StationsScreen(),
                   SearchScreen(),
                   FavoritesScreen(),

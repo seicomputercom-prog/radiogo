@@ -259,7 +259,7 @@ class SettingsScreen extends GetView<SettingsController> {
             fontWeight: FontWeight.bold,
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             'app_subtitle'.tr,
             style: TextStyle(
               color: AppColors.textSecondary,
