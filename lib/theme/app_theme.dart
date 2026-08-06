@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
+import 'app_colors.dart';
 
 class AppTheme {
   static ThemeData get darkCyberpunk {
@@ -28,7 +28,7 @@ class AppTheme {
         ),
         iconTheme: IconThemeData(color: AppColors.accentGreen),
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         color: AppColors.cardBg,
         shape: RoundedRectangleBorder(

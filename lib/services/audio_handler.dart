@@ -29,7 +29,7 @@ class RadioGoAudioHandler extends BaseAudioHandler with SeekHandler {
       artUri: station.favicon.isNotEmpty ? Uri.parse(station.favicon) : null,
     );
 
-    mediaItem.add(mediaItem);
+    item.add(mediaItem);
     playbackState.add(playbackState.value.copyWith(
       playing: true,
       processingState: AudioProcessingState.loading,
@@ -141,14 +141,13 @@ class RadioGoAudioHandler extends BaseAudioHandler with SeekHandler {
   /// Parse ICY metadata from the audio stream to extract track title.
   /// This listens to the just_audio player's icy metadata stream.
   Stream<String?> get icyMetadataStream {
-    return _player.icyMetadata
-            ?.map((meta) {
-              final headers = meta?.headers;
-              if (headers == null) return null;
-              return headers['icy-title'] as String?;
-            })
-            .where((title) => title != null) ??
-        const Stream.empty();
+    return _player.playbackEventStream
+        .map((_) {
+          final meta = _player.icyMetadata;
+          if (meta == null) return null;
+          return meta.headers['icy-title'] as String?;
+        })
+        .where((title) => title != null);
   }
 
   @override
