@@ -7,8 +7,6 @@
 
     <application
         android:label="RadioGo"
-        android:icon="@mipmap/ic_launcher"
-        android:useClearTextTraffic="true"
         android:theme="@style/Theme.RadioGo">
         <activity
             android:name=".MainActivity"
