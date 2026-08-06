@@ -145,8 +145,7 @@ class RadioGoAudioHandler extends BaseAudioHandler with SeekHandler {
         .map<String?>((_) {
           final meta = _player.icyMetadata;
           if (meta == null || meta.headers == null) return null;
-          final h = meta.headers!;
-          return h.description ?? h.name;
+          return meta.headers!.name;
         })
         .where((title) => title != null);
   }
