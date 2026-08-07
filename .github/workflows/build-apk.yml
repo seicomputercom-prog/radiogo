@@ -52,13 +52,38 @@ jobs:
           flutter build apk \
             --${{ github.event.inputs.build_mode || 'release' }} \
             --target-platform ${{ github.event.inputs.target_platform || 'android-arm64' }} \
-            --build-number=${{ github.run_number }}
+            --build-number=${{ github.run_number }} \
+            --verbose
+
+      - name: Locate APK
+        run: |
+          echo "Searching for APK files..."
+          find . -name "*.apk" -type f 2>/dev/null || true
+          mkdir -p /tmp/apk-output
+          APK_FILE=$(find . -name "app-release.apk" -type f 2>/dev/null | head -1)
+          if [ -n "$APK_FILE" ]; then
+            echo "Found APK: $APK_FILE"
+            cp "$APK_FILE" /tmp/apk-output/app-release.apk
+            ls -lh /tmp/apk-output/
+          else
+            echo "WARNING: No app-release.apk found, trying any APK"
+            ANY_APK=$(find . -name "*.apk" -type f 2>/dev/null | head -1)
+            if [ -n "$ANY_APK" ]; then
+              cp "$ANY_APK" /tmp/apk-output/app-release.apk
+              echo "Using: $ANY_APK"
+            else
+              echo "ERROR: No APK found at all"
+              ls -la build/ 2>/dev/null || echo "No build dir"
+              find build/ -type f -name "*.apk" 2>/dev/null || echo "No APKs in build/"
+            fi
+          fi
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: /tmp/apk-output/app-release.apk
+          if-no-files-found: error
           retention-days: 90
 
       - name: Build summary
@@ -68,4 +93,5 @@ jobs:
           echo "- **Platform**: ${{ github.event.inputs.target_platform || 'android-arm64' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Build number**: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **APK size**: $(du -h build/app/outputs/flutter-apk/app-release.apk | cut -f1)" >> $GITHUB_STEP_SUMMARY
+          APK_SIZE=$(du -h /tmp/apk-output/app-release.apk 2>/dev/null | cut -f1)
+          echo "- **APK size**: ${APK_SIZE:-N/A}" >> $GITHUB_STEP_SUMMARY
