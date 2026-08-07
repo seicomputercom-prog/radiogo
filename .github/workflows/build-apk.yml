@@ -11,15 +11,6 @@ on:
         options:
           - release
           - debug
-      target_platform:
-        description: 'Target platform'
-        required: false
-        default: 'android-arm64'
-        type: choice
-        options:
-          - android-arm64
-          - android-arm
-          - android-x64
 
 jobs:
   build:
@@ -47,23 +38,12 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        run: |
-          cd android && ./gradlew assembleRelease --stacktrace 2>&1 | tail -100
+        run: flutter build apk --release
 
-      - name: Find APK
-        run: |
-          echo "=== Searching for APK files ==="
-          find /home/runner/work/radiogo -name "*.apk" 2>/dev/null || echo "No APK found"
-          echo "=== Build dir contents ==="
-          ls -laR /home/runner/work/radiogo/radiogo/build/ 2>/dev/null || echo "No build dir"
-          echo "=== Android build dir ==="
-          ls -laR /home/runner/work/radiogo/radiogo/android/build/ 2>/dev/null || echo "No android build dir"
-
-      - name: Upload APK artifact
+      - name: Find and upload APK
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: app-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-          if-no-files-found: warn
+          path: |
+            build/app/outputs/flutter-apk/*.apk
           retention-days: 90
