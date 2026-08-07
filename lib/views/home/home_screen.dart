@@ -71,9 +71,9 @@ class HomeScreen extends GetView<MainController> {
                 index: controller.currentIndex.value,
                 children: [
                   StationsScreen(),
-                  const SearchScreen(),
-                  const FavoritesScreen(),
-                  const SettingsScreen(),
+                  SearchScreen(),
+                  FavoritesScreen(),
+                  SettingsScreen(),
                 ],
               ),
             ),
