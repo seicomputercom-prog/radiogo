@@ -55,7 +55,7 @@ jobs:
             --build-number=${{ github.run_number }} \
             --verbose 2>&1 | tee build_verbose.log
 
-      - name: Debug: list build dir
+      - name: "Debug: list build dir"
         if: always()
         run: |
           echo "=== build/ dir ==="
