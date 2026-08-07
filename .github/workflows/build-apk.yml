@@ -47,9 +47,12 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
-        working-directory: android
         run: |
-          ./gradlew assembleRelease --no-daemon --stacktrace
+          cd android && chmod +x gradlew && cd ..
+          flutter build apk \
+            --release \
+            --target-platform android-arm64 \
+            --build-number=${{ github.run_number }}
 
       - name: Find and upload APK
         run: |
@@ -75,8 +78,8 @@ jobs:
         run: |
           APK_PATH=$(find . -name "app-release.apk" -type f 2>/dev/null | head -1)
           echo "## Build Results" >> $GITHUB_STEP_SUMMARY
-          echo "- **Mode**: ${{ github.event.inputs.build_mode || 'release' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Platform**: ${{ github.event.inputs.target_platform || 'android-arm64' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Mode**: release" >> $GITHUB_STEP_SUMMARY
+          echo "- **Platform**: android-arm64" >> $GITHUB_STEP_SUMMARY
           echo "- **Build number**: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
           if [ -n "$APK_PATH" ]; then
