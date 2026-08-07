@@ -47,24 +47,39 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
+        working-directory: android
         run: |
-          flutter build apk \
-            --${{ github.event.inputs.build_mode || 'release' }} \
-            --target-platform ${{ github.event.inputs.target_platform || 'android-arm64' }} \
-            --build-number=${{ github.run_number }}
+          ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Find and upload APK
+        run: |
+          echo "Searching for APK files..."
+          find . -name "*.apk" -type f 2>/dev/null
+          APK_PATH=$(find . -name "app-release.apk" -type f 2>/dev/null | head -1)
+          if [ -z "$APK_PATH" ]; then
+            echo "ERROR: No APK found!"
+            exit 1
+          fi
+          echo "Found APK at: $APK_PATH"
+          mkdir -p /tmp/apk-output
+          cp "$APK_PATH" /tmp/apk-output/app-release.apk
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: /tmp/apk-output/app-release.apk
           retention-days: 90
 
       - name: Build summary
         run: |
+          APK_PATH=$(find . -name "app-release.apk" -type f 2>/dev/null | head -1)
           echo "## Build Results" >> $GITHUB_STEP_SUMMARY
           echo "- **Mode**: ${{ github.event.inputs.build_mode || 'release' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Platform**: ${{ github.event.inputs.target_platform || 'android-arm64' }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Build number**: ${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **APK size**: $(du -h build/app/outputs/flutter-apk/app-release.apk | cut -f1)" >> $GITHUB_STEP_SUMMARY
+          if [ -n "$APK_PATH" ]; then
+            echo "- **APK size**: $(du -h "$APK_PATH" | cut -f1)" >> $GITHUB_STEP_SUMMARY
+            echo "- **APK path**: $APK_PATH" >> $GITHUB_STEP_SUMMARY
+          fi
