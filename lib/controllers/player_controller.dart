@@ -6,6 +6,7 @@ import 'package:just_audio/just_audio.dart';
 import '../models/radio_station.dart';
 import '../services/audio_player_service.dart';
 import '../services/audio_handler.dart';
+import '../services/log_service.dart';
 import '../services/storage_service.dart';
 import '../services/radio_browser_service.dart';
 import '../utils/constants.dart';
@@ -34,8 +35,9 @@ class PlayerController extends GetxController {
       final handler = Get.find<RadioGoAudioHandler>();
       _audioService.init(handler);
       _listenToStreams();
+      LogService.I.i('Player', 'Audio service initialized');
     } catch (e) {
-      // Audio handler not ready yet
+      LogService.I.w('Player', 'Audio handler not ready yet', error: e.toString());
     }
   }
 
@@ -59,6 +61,7 @@ class PlayerController extends GetxController {
         final cleanTitle = _parseIcyTitle(title);
         nowPlayingTitle.value = cleanTitle;
         _audioService.updateTrackTitle(cleanTitle);
+        LogService.I.d('Player', 'ICY: $cleanTitle');
       }
     });
   }
@@ -83,26 +86,25 @@ class PlayerController extends GetxController {
 
   /// Play a radio station.
   Future<void> playStation(RadioStation station) async {
+    LogService.I.i('Player', 'Playing: ${station.name}');
     try {
       isLoading.value = true;
       currentStation.value = station;
       nowPlayingTitle.value = station.name;
 
       await _audioService.play(station);
+      LogService.I.i('Player', 'Stream started: ${station.urlResolved}');
 
-      // Add to recent history
       _storageService.addRecent(station);
 
-      // Send click to Radio-Browser
       try {
         final browserService = Get.find<RadioBrowserService>();
         await browserService.clickStation(station.stationuuid);
-      } catch (_) {
-        // Ignore click errors
-      }
-    } catch (e) {
+      } catch (_) {}
+    } catch (e, st) {
       isLoading.value = false;
       isPlaying.value = false;
+      LogService.I.e('Player', 'Failed to play ${station.name}', error: e.toString(), stackTrace: st.toString());
     }
   }
 

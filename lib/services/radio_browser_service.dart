@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import '../models/radio_station.dart';
 import '../utils/constants.dart';
+import 'log_service.dart';
 
 class RadioBrowserService {
   int _currentServerIndex = 0;
@@ -21,6 +22,7 @@ class RadioBrowserService {
     int limit = 30,
     int offset = 0,
   }) async {
+    LogService.I.d('API', 'searchStations: query="$query" limit=$limit offset=$offset');
     final params = <String, String>{
       'limit': limit.toString(),
       'offset': offset.toString(),
@@ -28,9 +30,7 @@ class RadioBrowserService {
       'reverse': 'true',
       'hidebroken': 'true',
     };
-    if (query.isNotEmpty) {
-      params['name'] = query;
-    }
+    if (query.isNotEmpty) params['name'] = query;
     return _fetchWithFallback('/stations/search', params);
   }
 
@@ -38,6 +38,7 @@ class RadioBrowserService {
     int limit = 30,
     int offset = 0,
   }) async {
+    LogService.I.d('API', 'getTopStations: limit=$limit offset=$offset');
     return _fetchWithFallback('/stations/search', {
       'limit': limit.toString(),
       'offset': offset.toString(),
@@ -52,6 +53,7 @@ class RadioBrowserService {
     int limit = 30,
     int offset = 0,
   }) async {
+    LogService.I.d('API', 'getStationsByCountry: $countryCode limit=$limit');
     return _fetchWithFallback('/stations/search', {
       'countrycode': countryCode,
       'limit': limit.toString(),
@@ -67,6 +69,7 @@ class RadioBrowserService {
     int limit = 30,
     int offset = 0,
   }) async {
+    LogService.I.d('API', 'getStationsByTag: $tag limit=$limit');
     return _fetchWithFallback('/stations/search', {
       'tag': tag,
       'limit': limit.toString(),
@@ -84,8 +87,8 @@ class RadioBrowserService {
       final request = await client.getUrl(uri);
       await request.close();
       client.close();
-    } catch (_) {
-      // silently ignore click errors
+    } catch (e) {
+      LogService.I.w('API', 'clickStation failed for $stationuuid', error: e.toString());
     }
   }
 
@@ -102,7 +105,8 @@ class RadioBrowserService {
           final body = await response.transform(utf8.decoder).join();
           return jsonDecode(body) as Map<String, dynamic>;
         }
-      } catch (_) {
+      } catch (e) {
+        LogService.I.w('API', 'Server ${AppConstants.radioBrowserServers[i]} info failed', error: e.toString());
         continue;
       }
     }
@@ -110,19 +114,15 @@ class RadioBrowserService {
   }
 
   Future<List<RadioStation>> _fetchWithFallback(
-    String path,
-    Map<String, String> params,
+    String path, Map<String, String> params,
   ) async {
     final totalServers = AppConstants.radioBrowserServers.length;
-    for (int attempt = 0;
-        attempt < AppConstants.apiRetryCount + 1;
-        attempt++) {
+    for (int attempt = 0; attempt < AppConstants.apiRetryCount + 1; attempt++) {
       for (int s = 0; s < totalServers; s++) {
         final idx = (_currentServerIndex + s) % totalServers;
         final base = AppConstants.radioBrowserServers[idx];
         try {
-          final uri =
-              Uri.parse('$base$path').replace(queryParameters: params);
+          final uri = Uri.parse('$base$path').replace(queryParameters: params);
           final client = _client;
           final request = await client.getUrl(uri);
           final response = await request.close();
@@ -132,20 +132,22 @@ class RadioBrowserService {
             final body = await response.transform(utf8.decoder).join();
             final List<dynamic> jsonList = jsonDecode(body);
             _currentServerIndex = idx;
+            LogService.I.i('API', 'Success: $base$path (${jsonList.length} stations, attempt $attempt)');
             return jsonList
-                .map(
-                    (json) => RadioStation.fromJson(json as Map<String, dynamic>))
+                .map((json) => RadioStation.fromJson(json as Map<String, dynamic>))
                 .toList();
+          } else {
+            LogService.I.w('API', 'HTTP ${response.statusCode} from $base$path');
           }
-        } catch (_) {
+        } catch (e) {
+          LogService.I.w('API', 'Failed: $base$path (attempt $attempt.${s + 1})', error: e.toString());
           continue;
         }
       }
     }
+    LogService.I.e('API', 'All servers failed for $path after ${AppConstants.apiRetryCount + 1} retries');
     return [];
   }
 
-  void dispose() {
-    // HttpClient instances are closed per-request
-  }
+  void dispose() {}
 }

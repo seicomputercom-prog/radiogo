@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../controllers/settings_controller.dart';
+import '../../routes/app_routes.dart';
 import '../../services/storage_service.dart';
+import '../../services/log_service.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/constants.dart';
 import '../../widgets/cyberpunk_widgets.dart';
@@ -23,6 +25,7 @@ class SettingsScreen extends GetView<SettingsController> {
         _buildThemeTiles(),
         const SizedBox(height: 8),
         _buildSectionHeader('settings'.tr),
+        _buildDevLogsTile(),
         _buildClearRecentTile(),
         _buildClearCacheTile(),
         const SizedBox(height: 8),
@@ -205,6 +208,32 @@ class SettingsScreen extends GetView<SettingsController> {
           }).toList(),
         );
       }),
+    );
+  }
+
+  // ==================== DEV LOGS ====================
+
+  Widget _buildDevLogsTile() {
+    final tc = controller.currentTheme.value;
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      decoration: BoxDecoration(
+        color: tc.cardBg,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: tc.divider),
+      ),
+      child: ListTile(
+        leading: Icon(Icons.terminal, color: tc.accentDim, size: 22),
+        title: Text('Developer Logs',
+          style: TextStyle(color: tc.textWhite, fontFamily: 'ShareTechMono', fontSize: 14)),
+        subtitle: Text('View, filter, export app logs',
+          style: TextStyle(color: tc.textSecondary, fontFamily: 'ShareTechMono', fontSize: 11)),
+        trailing: Icon(Icons.chevron_right, color: tc.accent, size: 20),
+        onTap: () {
+          LogService.I.i('Settings', 'Opening log viewer');
+          Get.toNamed(AppRoutes.logs);
+        },
+      ),
     );
   }
 
