@@ -110,6 +110,19 @@ class StorageService {
     _settings.put(AppConstants.settingsLocaleKey, localeCode);
   }
 
+  /// Get saved theme key.
+  String getTheme() {
+    return _settings.get(
+      AppConstants.settingsThemeKey,
+      defaultValue: 'cyberpunk',
+    ) as String;
+  }
+
+  /// Save theme key.
+  void saveTheme(String themeKey) {
+    _settings.put(AppConstants.settingsThemeKey, themeKey);
+  }
+
   // ======================== CACHE ========================
 
   Box get _cache => Hive.box(AppConstants.cacheBoxName);

@@ -17,13 +17,15 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  bool _canSkip = false;
+  bool _navigated = false;
 
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 2500),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -42,12 +44,21 @@ class _SplashScreenState extends State<SplashScreen>
 
     _animationController.forward();
 
-    // Navigate to home after 2.5 seconds
-    Future.delayed(const Duration(milliseconds: 2500), () {
-      if (mounted) {
-        Get.offAllNamed(AppRoutes.home);
-      }
+    // Allow skip after 2 seconds
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _canSkip = true);
     });
+
+    // Auto-navigate after 6 seconds
+    Future.delayed(const Duration(seconds: 6), () {
+      if (mounted && !_navigated) _navigate();
+    });
+  }
+
+  void _navigate() {
+    if (_navigated) return;
+    _navigated = true;
+    Get.offAllNamed(AppRoutes.home);
   }
 
   @override
@@ -62,13 +73,8 @@ class _SplashScreenState extends State<SplashScreen>
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          // Matrix rain background
           _MatrixRainBackground(),
-          // Dark overlay for contrast
-          Container(
-            color: AppColors.background.withAlpha(150),
-          ),
-          // Center content
+          Container(color: AppColors.background.withAlpha(150)),
           Center(
             child: AnimatedBuilder(
               animation: _animationController,
@@ -84,7 +90,6 @@ class _SplashScreenState extends State<SplashScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Radio icon with glow
                   Container(
                     width: 80,
                     height: 80,
@@ -110,14 +115,12 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                   const SizedBox(height: 24),
-                  // Title
                   const NeonText(
                     text: 'RadioGO',
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
                   ),
                   const SizedBox(height: 8),
-                  // Subtitle
                   const Text(
                     'by infobit.cloud',
                     style: TextStyle(
@@ -128,8 +131,57 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                   const SizedBox(height: 40),
-                  // Loading indicator
                   const CyberLoadingIndicator(size: 30),
+                ],
+              ),
+            ),
+          ),
+          // Copyright at bottom
+          Positioned(
+            bottom: 80,
+            left: 0,
+            right: 0,
+            child: AnimatedOpacity(
+              opacity: _canSkip ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 500),
+              child: Column(
+                children: [
+                  const Text(
+                    '(c) 2025 infobit.cloud',
+                    style: TextStyle(
+                      color: AppColors.textSecondary,
+                      fontFamily: 'ShareTechMono',
+                      fontSize: 10,
+                      letterSpacing: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: _canSkip ? _navigate : null,
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.accentGreen,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 8,
+                      ),
+                      side: const BorderSide(
+                        color: AppColors.accentGreen,
+                        width: 1,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: const Text(
+                      'SKIP >>',
+                      style: TextStyle(
+                        fontFamily: 'ShareTechMono',
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

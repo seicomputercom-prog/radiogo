@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/storage_service.dart';
 import '../l10n/app_translations.dart';
+import '../theme/app_colors.dart';
 
 class SettingsController extends GetxController {
   final StorageService _storageService = Get.find<StorageService>();
 
   final Rx<Locale> currentLocale = const Locale('it', 'IT').obs;
+  final Rx<ThemeColors> currentTheme = ThemeColors.cyberpunk.obs;
 
   @override
   void onInit() {
@@ -14,35 +16,37 @@ class SettingsController extends GetxController {
     loadSettings();
   }
 
-  /// Load saved settings from Hive.
   void loadSettings() {
     final savedLocale = _storageService.getLocale();
-
     Locale locale;
     if (savedLocale == 'en_US') {
       locale = const Locale('en', 'US');
     } else {
       locale = const Locale('it', 'IT');
     }
-
     currentLocale.value = locale;
     Get.updateLocale(locale);
+
+    final savedTheme = _storageService.getTheme();
+    currentTheme.value = ThemeColors.fromKey(savedTheme);
   }
 
-  /// Change the app locale.
   void changeLocale(Locale locale) {
     currentLocale.value = locale;
-    _storageService.saveLocale('${locale.languageCode}_${locale.countryCode}');
-
-    // Update GetX locale and refresh translations
-    final translations = AppTranslations();
-    Get.locale = locale;
-    // Force translation update
+    _storageService.saveLocale(
+        '${locale.languageCode}_${locale.countryCode}');
     final newLocale = locale;
     Get.updateLocale(newLocale);
   }
 
-  /// Toggle between Italian and English.
+  void changeTheme(ThemeColors theme) {
+    currentTheme.value = theme;
+    _storageService.saveTheme(theme.key);
+  }
+
+  bool get isItalian => currentLocale.value.languageCode == 'it';
+  bool get isEnglish => currentLocale.value.languageCode == 'en';
+
   void toggleLanguage() {
     if (currentLocale.value.languageCode == 'it') {
       changeLocale(const Locale('en', 'US'));
@@ -50,10 +54,4 @@ class SettingsController extends GetxController {
       changeLocale(const Locale('it', 'IT'));
     }
   }
-
-  /// Check if current locale is Italian.
-  bool get isItalian => currentLocale.value.languageCode == 'it';
-
-  /// Check if current locale is English.
-  bool get isEnglish => currentLocale.value.languageCode == 'en';
 }
