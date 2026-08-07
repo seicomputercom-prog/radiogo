@@ -316,6 +316,10 @@ class LogService {
   /// Get total log file size in bytes.
   Future<int> getTotalLogSize() async {
     final info = await getLogFileInfo();
-    return info.values.fold(0, (a, b) => a + b);
+    int total = 0;
+    for (final size in info.values) {
+      total += size;
+    }
+    return total;
   }
 }
