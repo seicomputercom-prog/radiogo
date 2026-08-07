@@ -52,29 +52,33 @@ jobs:
           flutter build apk \
             --${{ github.event.inputs.build_mode || 'release' }} \
             --target-platform ${{ github.event.inputs.target_platform || 'android-arm64' }} \
-            --build-number=${{ github.run_number }} \
-            --verbose
+            --build-number=${{ github.run_number }}
+        continue-on-error: true
 
-      - name: Locate APK
+      - name: Locate and prepare APK
         run: |
-          echo "Searching for APK files..."
+          echo "=== Searching for APK files ==="
           find . -name "*.apk" -type f 2>/dev/null || true
+          echo "=== Directory structure ==="
+          ls -la build/ 2>/dev/null || echo "No build/ dir"
+          ls -la build/app/outputs/ 2>/dev/null || echo "No build/app/outputs/"
+          ls -la build/app/outputs/apk/ 2>/dev/null || echo "No apk/ dir"
+          ls -la build/app/outputs/flutter-apk/ 2>/dev/null || echo "No flutter-apk/ dir"
+          ls -la android/app/build/outputs/ 2>/dev/null || echo "No android/app/build/outputs/"
           mkdir -p /tmp/apk-output
-          APK_FILE=$(find . -name "app-release.apk" -type f 2>/dev/null | head -1)
-          if [ -n "$APK_FILE" ]; then
-            echo "Found APK: $APK_FILE"
-            cp "$APK_FILE" /tmp/apk-output/app-release.apk
+          APK=$(find . -name "app-release.apk" -type f 2>/dev/null | head -1)
+          if [ -n "$APK" ]; then
+            echo "Found: $APK"
+            cp "$APK" /tmp/apk-output/app-release.apk
             ls -lh /tmp/apk-output/
           else
-            echo "WARNING: No app-release.apk found, trying any APK"
-            ANY_APK=$(find . -name "*.apk" -type f 2>/dev/null | head -1)
-            if [ -n "$ANY_APK" ]; then
-              cp "$ANY_APK" /tmp/apk-output/app-release.apk
-              echo "Using: $ANY_APK"
+            ANY=$(find . -name "*.apk" -type f 2>/dev/null | head -1)
+            if [ -n "$ANY" ]; then
+              echo "Using fallback: $ANY"
+              cp "$ANY" /tmp/apk-output/app-release.apk
             else
-              echo "ERROR: No APK found at all"
-              ls -la build/ 2>/dev/null || echo "No build dir"
-              find build/ -type f -name "*.apk" 2>/dev/null || echo "No APKs in build/"
+              echo "ERROR: No APK found"
+              exit 1
             fi
           fi
 
@@ -87,6 +91,7 @@ jobs:
           retention-days: 90
 
       - name: Build summary
+        if: always()
         run: |
           echo "## Build Results" >> $GITHUB_STEP_SUMMARY
           echo "- **Mode**: ${{ github.event.inputs.build_mode || 'release' }}" >> $GITHUB_STEP_SUMMARY
