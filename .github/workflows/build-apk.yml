@@ -52,7 +52,18 @@ jobs:
           flutter build apk \
             --release \
             --target-platform android-arm64 \
-            --build-number=${{ github.run_number }}
+            --build-number=${{ github.run_number }} \
+            --verbose 2>&1 | tee build_verbose.log
+
+      - name: Debug: list build dir
+        if: always()
+        run: |
+          echo "=== build/ dir ==="
+          find . -path './build' -prune -o -name '*.apk' -print 2>/dev/null
+          echo "=== build/app/outputs ==="
+          ls -laR build/app/outputs/ 2>/dev/null || echo 'not found'
+          echo "=== Last 200 lines of verbose log ==="
+          tail -200 build_verbose.log 2>/dev/null || echo 'no log'
 
       - name: Find and upload APK
         run: |
