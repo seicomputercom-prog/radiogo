@@ -11,6 +11,12 @@ class RadioBrowserService {
   String get _baseUrl =>
       AppConstants.radioBrowserServers[_currentServerIndex];
 
+  /// Common headers for API requests. Radio-Browser requires a User-Agent.
+  Map<String, String> get _headers => {
+    'User-Agent': 'RadioGo/1.0 (infobit.cloud)',
+    'Accept': 'application/json',
+  };
+
   Future<List<RadioStation>> searchStations({
     String query = '',
     int limit = 30,
@@ -76,8 +82,8 @@ class RadioBrowserService {
 
   Future<void> clickStation(String stationuuid) async {
     try {
-      final uri = Uri.parse('$_baseUrl/url/$stationuuid');
-      await http.get(uri).timeout(const Duration(seconds: 5));
+      final uri = Uri.parse('$_baseUrl/json/url/$stationuuid');
+      await http.get(uri, headers: _headers).timeout(const Duration(seconds: 5));
     } catch (e) {
       LogService.I.w('API', 'clickStation failed for $stationuuid', error: e.toString());
     }
@@ -87,9 +93,9 @@ class RadioBrowserService {
     for (int i = 0; i < AppConstants.radioBrowserServers.length; i++) {
       try {
         final base = AppConstants.radioBrowserServers[i];
-        final uri = Uri.parse('$base/server/info');
+        final uri = Uri.parse('$base/json/server/info');
         final response = await http
-            .get(uri)
+            .get(uri, headers: _headers)
             .timeout(const Duration(seconds: 8));
         if (response.statusCode == 200) {
           final body = response.body;
@@ -111,15 +117,19 @@ class RadioBrowserService {
     final totalServers = AppConstants.radioBrowserServers.length;
     final timeout = Duration(seconds: AppConstants.apiTimeoutSeconds);
 
+    // Ensure path starts with /json/ for JSON responses
+    final jsonPath = path.startsWith('/json/') ? path : '/json$path';
+
     for (int attempt = 0; attempt < AppConstants.apiRetryCount + 1; attempt++) {
       for (int s = 0; s < totalServers; s++) {
         final idx = (_currentServerIndex + s) % totalServers;
         final base = AppConstants.radioBrowserServers[idx];
         try {
           final uri =
-              Uri.parse('$base$path').replace(queryParameters: params);
+              Uri.parse('$base$jsonPath').replace(queryParameters: params);
+          LogService.I.d('API', 'GET $uri');
           final response =
-              await http.get(uri).timeout(timeout);
+              await http.get(uri, headers: _headers).timeout(timeout);
 
           if (response.statusCode == 200) {
             final body = response.body;

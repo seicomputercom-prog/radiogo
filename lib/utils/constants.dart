@@ -24,8 +24,8 @@ class AppConstants {
   static const String settingsThemeKey = 'theme';
   static const int cacheTtlHours = 24;
   static const int maxRecentStations = 20;
-  static const int apiTimeoutSeconds = 8;
-  static const int apiRetryCount = 1;
+  static const int apiTimeoutSeconds = 15;
+  static const int apiRetryCount = 2;
   static const String defaultStationName = 'Radio Arcobaleno';
   static const String defaultStationUrl =
       'https://streamingv2.shoutcast.com/radio-arcobaleno';

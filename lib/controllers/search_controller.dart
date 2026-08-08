@@ -4,7 +4,7 @@ import '../models/radio_station.dart';
 import '../services/radio_browser_service.dart';
 
 class SearchController extends GetxController {
-  final RadioBrowserService _browserService = Get.find<RadioBrowserService>();
+  late final RadioBrowserService _browserService;
 
   final RxString searchQuery = ''.obs;
   final RxList<RadioStation> searchResults = <RadioStation>[].obs;
@@ -14,6 +14,24 @@ class SearchController extends GetxController {
   Timer? _debounceTimer;
   static const int _debounceMs = 500;
   static const int _resultLimit = 50;
+
+  @override
+  void onInit() {
+    super.onInit();
+    try {
+      _browserService = Get.find<RadioBrowserService>();
+    } catch (e) {
+      // Service not ready yet, will be resolved lazily
+    }
+  }
+
+  RadioBrowserService get _service {
+    try {
+      return Get.find<RadioBrowserService>();
+    } catch (_) {
+      return _browserService;
+    }
+  }
 
   /// Called when search query changes. Debounces by 500ms.
   void onSearchChanged(String query) {
@@ -41,7 +59,7 @@ class SearchController extends GetxController {
     noResults.value = false;
 
     try {
-      final stations = await _browserService.searchStations(
+      final stations = await _service.searchStations(
         query: query,
         limit: _resultLimit,
         offset: 0,

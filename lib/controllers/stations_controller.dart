@@ -14,8 +14,8 @@ class _LoadState {
 }
 
 class StationsController extends GetxController {
-  final RadioBrowserService _browserService = Get.find<RadioBrowserService>();
-  final StorageService _storageService = Get.find<StorageService>();
+  late final RadioBrowserService _browserService;
+  late final StorageService _storageService;
 
   final RxList<RadioStation> allStations = <RadioStation>[].obs;
   final RxList<RadioStation> italianStations = <RadioStation>[].obs;
@@ -38,10 +38,31 @@ class StationsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Use try-catch to avoid crash if services are not yet available
+    try {
+      _browserService = Get.find<RadioBrowserService>();
+      _storageService = Get.find<StorageService>();
+    } catch (e) {
+      LogService.I.e('Stations', 'Failed to find services in onInit', error: e.toString());
+      return;
+    }
     LogService.I.i('Stations', 'Controller initialized, loading stations...');
     loadTopStations();
     loadItalianStations();
     loadInternationalStations();
+  }
+
+  /// Called when services become available (defensive re-init).
+  void ensureServices() {
+    try {
+      _browserService = Get.find<RadioBrowserService>();
+      _storageService = Get.find<StorageService>();
+    } catch (_) {}
+    if (allStations.isEmpty && italianStations.isEmpty && internationalStations.isEmpty) {
+      loadTopStations();
+      loadItalianStations();
+      loadInternationalStations();
+    }
   }
 
   /// Load top/popular stations (all).

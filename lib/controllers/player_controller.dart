@@ -12,8 +12,8 @@ import '../services/radio_browser_service.dart';
 import '../utils/constants.dart';
 
 class PlayerController extends GetxController {
-  final AudioPlayerService _audioService = Get.find<AudioPlayerService>();
-  final StorageService _storageService = Get.find<StorageService>();
+  late final AudioPlayerService _audioService;
+  late final StorageService _storageService;
 
   final RxBool isPlaying = false.obs;
   final RxBool isLoading = false.obs;
@@ -27,6 +27,13 @@ class PlayerController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    try {
+      _audioService = Get.find<AudioPlayerService>();
+      _storageService = Get.find<StorageService>();
+    } catch (e) {
+      LogService.I.e('Player', 'Failed to find services in onInit', error: e.toString());
+      return;
+    }
     _initAudioService();
   }
 
