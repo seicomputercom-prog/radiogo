@@ -57,7 +57,6 @@ class SearchScreen extends GetView<SearchController> {
                   }
                   return const SizedBox.shrink();
                 }),
-                cursorColor: tc.accent,
                 textInputAction: TextInputAction.search,
               ),
             ),
