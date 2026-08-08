@@ -60,6 +60,17 @@ jobs:
             --build-number=${{ github.run_number }} 2>&1 | tee /tmp/build_log.txt
           echo "BUILD_EXIT_CODE=$?" >> $GITHUB_ENV
 
+      - name: Diagnose Gradle on failure
+        if: failure()
+        run: |
+          echo "=== Re-running Gradle with --info to get real error ==="
+          cd android
+          ./gradlew assembleRelease --info 2>&1 | tail -80 | tee /tmp/gradle_diag.txt || true
+          echo "=== Build output dirs ==="
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APK found anywhere"
+          ls -laR build/app/outputs/ 2>/dev/null || echo "No outputs dir"
+          ls -laR app/build/outputs/ 2>/dev/null || echo "No app outputs dir"
+
       - name: Show build log on failure
         if: always()
         run: |
