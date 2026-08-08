@@ -52,19 +52,6 @@ class StationsController extends GetxController {
     loadInternationalStations();
   }
 
-  /// Called when services become available (defensive re-init).
-  void ensureServices() {
-    try {
-      _browserService = Get.find<RadioBrowserService>();
-      _storageService = Get.find<StorageService>();
-    } catch (_) {}
-    if (allStations.isEmpty && italianStations.isEmpty && internationalStations.isEmpty) {
-      loadTopStations();
-      loadItalianStations();
-      loadInternationalStations();
-    }
-  }
-
   /// Load top/popular stations (all).
   Future<void> loadTopStations({bool refresh = false}) async {
     if (refresh) {
