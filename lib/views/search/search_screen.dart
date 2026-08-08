@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide SearchController;
 import 'package:get/get.dart';
 import '../../controllers/search_controller.dart';
 import '../../controllers/player_controller.dart';
+import '../../controllers/settings_controller.dart';
 import '../../models/radio_station.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/station_card.dart';
@@ -10,19 +11,20 @@ import '../../widgets/cyberpunk_widgets.dart';
 class SearchScreen extends GetView<SearchController> {
   const SearchScreen({super.key});
 
+  ThemeColors get _tc => Get.find<SettingsController>().currentTheme.value;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Search bar
         _buildSearchBar(),
-        // Results
         Expanded(child: _buildResults()),
       ],
     );
   }
 
   Widget _buildSearchBar() {
+    final tc = _tc;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Row(
@@ -30,34 +32,34 @@ class SearchScreen extends GetView<SearchController> {
           Expanded(
             child: TextField(
               onChanged: controller.onSearchChanged,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: tc.textPrimary,
                 fontFamily: 'ShareTechMono',
                 fontSize: 14,
               ),
               decoration: InputDecoration(
                 hintText: 'search_placeholder'.tr,
-                prefixIcon: const Icon(
+                prefixIcon: Icon(
                   Icons.search,
-                  color: AppColors.accentGreenDim,
+                  color: tc.accentDim,
                   size: 20,
                 ),
                 suffixIcon: Obx(() {
                   if (controller.searchQuery.value.isNotEmpty) {
                     return GestureDetector(
                       onTap: controller.clearSearch,
-                      child: const Icon(
+                      child: Icon(
                         Icons.clear,
-                        color: AppColors.textSecondary,
+                        color: tc.textSecondary,
                         size: 20,
                       ),
                     );
                   }
                   return const SizedBox.shrink();
                 }),
+                cursorColor: tc.accent,
+                textInputAction: TextInputAction.search,
               ),
-              cursorColor: AppColors.accentGreen,
-              textInputAction: TextInputAction.search,
             ),
           ),
         ],
@@ -67,28 +69,26 @@ class SearchScreen extends GetView<SearchController> {
 
   Widget _buildResults() {
     return Obx(() {
+      final tc = _tc;
       final isSearching = controller.isSearching.value;
-      final hasResults = controller.searchResults.isNotEmpty;
       final noResults = controller.noResults.value;
       final query = controller.searchQuery.value;
 
-      // Initial state - no query entered
       if (query.isEmpty && !isSearching) {
-        return _buildInitialState();
+        return _buildInitialState(tc);
       }
 
-      // Searching
       if (isSearching) {
         return Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CyberLoadingIndicator(size: 36),
+              CyberLoadingIndicator(size: 36, color: tc.accent),
               const SizedBox(height: 16),
               Text(
                 'search'.tr,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: tc.textSecondary,
                   fontFamily: 'ShareTechMono',
                   fontSize: 12,
                 ),
@@ -98,27 +98,27 @@ class SearchScreen extends GetView<SearchController> {
         );
       }
 
-      // No results
       if (noResults) {
         return Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.search_off,
-                color: AppColors.accentGreenDim,
+                color: tc.accentDim,
                 size: 48,
               ),
               const SizedBox(height: 16),
               NeonText(
                 text: 'no_results'.tr,
                 fontSize: 18,
+                color: tc.accent,
               ),
               const SizedBox(height: 8),
               Text(
                 '"${controller.searchQuery.value}"',
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
+                style: TextStyle(
+                  color: tc.textSecondary,
                   fontFamily: 'ShareTechMono',
                   fontSize: 12,
                 ),
@@ -128,7 +128,6 @@ class SearchScreen extends GetView<SearchController> {
         );
       }
 
-      // Results list
       return ListView.builder(
         padding: const EdgeInsets.only(bottom: 8),
         itemCount: controller.searchResults.length,
@@ -143,7 +142,7 @@ class SearchScreen extends GetView<SearchController> {
     });
   }
 
-  Widget _buildInitialState() {
+  Widget _buildInitialState(ThemeColors tc) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -153,15 +152,15 @@ class SearchScreen extends GetView<SearchController> {
             height: 80,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.accentGreen.withAlpha(10),
+              color: tc.accent.withAlpha(10),
               border: Border.all(
-                color: AppColors.accentGreenDim.withAlpha(80),
+                color: tc.accentDim.withAlpha(80),
                 width: 1.5,
               ),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.search,
-              color: AppColors.accentGreenDim,
+              color: tc.accentDim,
               size: 36,
             ),
           ),
@@ -169,12 +168,13 @@ class SearchScreen extends GetView<SearchController> {
           NeonText(
             text: 'search'.tr,
             fontSize: 20,
+            color: tc.accent,
           ),
           const SizedBox(height: 8),
           Text(
             'search_placeholder'.tr,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: tc.textSecondary,
               fontFamily: 'ShareTechMono',
               fontSize: 13,
             ),

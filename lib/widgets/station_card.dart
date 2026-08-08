@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../models/radio_station.dart';
 import '../theme/app_colors.dart';
 import '../controllers/player_controller.dart';
+import '../controllers/settings_controller.dart';
 
 class StationCard extends StatefulWidget {
   final RadioStation station;
@@ -25,10 +26,12 @@ class StationCard extends StatefulWidget {
 
 class _StationCardState extends State<StationCard> {
   bool _isPressed = false;
+  ThemeColors get _tc => Get.find<SettingsController>().currentTheme.value;
 
   @override
   Widget build(BuildContext context) {
     final station = widget.station;
+    final tc = _tc;
     final isPlaying = Get.find<PlayerController>().isCurrentStation(station);
 
     return GestureDetector(
@@ -41,20 +44,16 @@ class _StationCardState extends State<StationCard> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: _isPressed
-              ? AppColors.surfaceLight.withAlpha(200)
-              : AppColors.cardBg,
+          color: _isPressed ? tc.surfaceLight.withAlpha(200) : tc.cardBg,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isPlaying
-                ? AppColors.accentGreen
-                : AppColors.divider,
+            color: isPlaying ? tc.accent : tc.divider,
             width: isPlaying ? 1.5 : 1,
           ),
           boxShadow: isPlaying
               ? [
                   BoxShadow(
-                    color: AppColors.accentGreen.withAlpha(40),
+                    color: tc.accent.withAlpha(40),
                     blurRadius: 12,
                     spreadRadius: 1,
                   ),
@@ -63,19 +62,16 @@ class _StationCardState extends State<StationCard> {
         ),
         child: Row(
           children: [
-            // Favicon
             _buildFavicon(station.favicon, isPlaying),
             const SizedBox(width: 12),
-            // Station info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Station name
                   Text(
                     station.name,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
+                    style: TextStyle(
+                      color: tc.textPrimary,
                       fontFamily: 'ShareTechMono',
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -84,21 +80,16 @@ class _StationCardState extends State<StationCard> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  // Country + Genre
                   Row(
                     children: [
                       if (station.country.isNotEmpty) ...[
-                        Icon(
-                          Icons.location_on,
-                          size: 12,
-                          color: AppColors.textSecondary,
-                        ),
+                        Icon(Icons.location_on, size: 12, color: tc.textSecondary),
                         const SizedBox(width: 2),
                         Flexible(
                           child: Text(
                             station.country,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: tc.textSecondary,
                               fontFamily: 'ShareTechMono',
                               fontSize: 11,
                             ),
@@ -113,8 +104,8 @@ class _StationCardState extends State<StationCard> {
                         Flexible(
                           child: Text(
                             station.displayTags,
-                            style: const TextStyle(
-                              color: AppColors.textSecondary,
+                            style: TextStyle(
+                              color: tc.textSecondary,
                               fontFamily: 'ShareTechMono',
                               fontSize: 11,
                             ),
@@ -127,69 +118,49 @@ class _StationCardState extends State<StationCard> {
                 ],
               ),
             ),
-            // Right side: bitrate + favorite
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (station.displayBitrate.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.accentGreen.withAlpha(20),
+                      color: tc.accent.withAlpha(20),
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: AppColors.accentGreenDim,
-                        width: 0.5,
-                      ),
+                      border: Border.all(color: tc.accentDim, width: 0.5),
                     ),
                     child: Text(
                       station.displayBitrate,
-                      style: const TextStyle(
-                        color: AppColors.accentGreen,
+                      style: TextStyle(
+                        color: tc.accent,
                         fontFamily: 'ShareTechMono',
                         fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
-                if (station.displayBitrate.isNotEmpty)
-                  const SizedBox(height: 8),
+                if (station.displayBitrate.isNotEmpty) const SizedBox(height: 8),
                 if (widget.showFavorite)
                   GestureDetector(
                     onTap: widget.onFavoriteTap,
-                    child: Obx(() {
-                      final storage = Get.find<PlayerController>();
-                      final isFav = false; // Check will be done by parent
-                      return Icon(
-                        isFav ? Icons.favorite : Icons.favorite_border,
-                        color: isFav
-                            ? AppColors.errorRed
-                            : AppColors.textSecondary,
-                        size: 20,
-                      );
-                    }),
+                    child: Icon(
+                      Icons.favorite_border,
+                      color: tc.textSecondary,
+                      size: 20,
+                    ),
                   )
                 else if (isPlaying)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.accentGreen.withAlpha(30),
+                      color: tc.accent.withAlpha(30),
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                        color: AppColors.accentGreen,
-                        width: 0.5,
-                      ),
+                      border: Border.all(color: tc.accent, width: 0.5),
                     ),
-                    child: const Text(
+                    child: Text(
                       'LIVE',
                       style: TextStyle(
-                        color: AppColors.accentGreen,
+                        color: tc.accent,
                         fontFamily: 'ShareTechMono',
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
@@ -206,23 +177,20 @@ class _StationCardState extends State<StationCard> {
   }
 
   Widget _buildFavicon(String url, bool isPlaying) {
+    final tc = _tc;
     if (url.isEmpty) {
       return Container(
         width: 50,
         height: 50,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.surface,
+          color: tc.surface,
           border: Border.all(
-            color: isPlaying ? AppColors.accentGreen : AppColors.divider,
+            color: isPlaying ? tc.accent : tc.divider,
             width: isPlaying ? 2 : 1,
           ),
         ),
-        child: const Icon(
-          Icons.radio,
-          color: AppColors.accentGreenDim,
-          size: 24,
-        ),
+        child: Icon(Icons.radio, color: tc.accentDim, size: 24),
       );
     }
 
@@ -232,13 +200,13 @@ class _StationCardState extends State<StationCard> {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: Border.all(
-          color: isPlaying ? AppColors.accentGreen : AppColors.divider,
+          color: isPlaying ? tc.accent : tc.divider,
           width: isPlaying ? 2 : 1,
         ),
         boxShadow: isPlaying
             ? [
                 BoxShadow(
-                  color: AppColors.accentGreen.withAlpha(60),
+                  color: tc.accent.withAlpha(60),
                   blurRadius: 8,
                 ),
               ]
@@ -251,27 +219,21 @@ class _StationCardState extends State<StationCard> {
           width: 50,
           height: 50,
           placeholder: (context, url) => Container(
-            color: AppColors.surface,
-            child: const Center(
+            color: tc.surface,
+            child: Center(
               child: SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.accentGreenDim,
-                  ),
+                  valueColor: AlwaysStoppedAnimation<Color>(tc.accentDim),
                 ),
               ),
             ),
           ),
           errorWidget: (context, url, error) => Container(
-            color: AppColors.surface,
-            child: const Icon(
-              Icons.radio,
-              color: AppColors.accentGreenDim,
-              size: 24,
-            ),
+            color: tc.surface,
+            child: Icon(Icons.radio, color: tc.accentDim, size: 24),
           ),
         ),
       ),

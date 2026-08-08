@@ -1,0 +1,11 @@
+{
+  "owner": "seicomputercom-prog",
+  "repo": "radiogo",
+  "branch": "main",
+  "pat_file": "/home/z/my-project/upload/github_token.txt",
+  "workflow_file": "build-apk.yml",
+  "flutter_version": "3.44.6",
+  "dart_version": "3.12.2",
+  "app_name": "radiogo",
+  "output_dir": "/home/z/my-project/download/"
+}

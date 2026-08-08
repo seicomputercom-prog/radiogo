@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controllers/player_controller.dart';
+import '../../controllers/settings_controller.dart';
 import '../../services/storage_service.dart';
 import '../../models/radio_station.dart';
 import '../../theme/app_colors.dart';
@@ -18,6 +19,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   final StorageService _storage = Get.find<StorageService>();
   final RxList<RadioStation> favorites = <RadioStation>[].obs;
 
+  ThemeColors get _tc => Get.find<SettingsController>().currentTheme.value;
+
   @override
   void initState() {
     super.initState();
@@ -31,11 +34,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   void _removeFavorite(RadioStation station) {
     _storage.removeFavorite(station.stationuuid);
     favorites.remove(station);
-
+    final tc = _tc;
     Get.showSnackbar(GetSnackBar(
-      message: 'fav_removed'.tr,
       duration: const Duration(seconds: 2),
-      backgroundColor: AppColors.surface,
+      backgroundColor: tc.surface,
       borderColor: AppColors.errorRed,
       borderWidth: 1,
       borderRadius: 8,
@@ -43,7 +45,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
       snackStyle: SnackStyle.FLOATING,
       messageText: Text(
         'fav_removed'.tr,
-        style: const TextStyle(
+        style: TextStyle(
           color: AppColors.errorRed,
           fontFamily: 'ShareTechMono',
         ),
@@ -59,13 +61,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      final tc = _tc;
       if (favorites.isEmpty) {
-        return _buildEmptyState();
+        return _buildEmptyState(tc);
       }
 
       return RefreshIndicator(
-        color: AppColors.accentGreen,
-        backgroundColor: AppColors.surface,
+        color: tc.accent,
+        backgroundColor: tc.surface,
         onRefresh: () async {
           _loadFavorites();
         },
@@ -84,11 +87,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   color: AppColors.errorRed.withAlpha(40),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.delete_outline,
-                  color: AppColors.errorRed,
-                  size: 28,
-                ),
+                child: Icon(Icons.delete_outline, color: AppColors.errorRed, size: 28),
               ),
               child: StationCard(
                 station: favorites[index],
@@ -102,7 +101,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     });
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(ThemeColors tc) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -112,28 +111,21 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             height: 80,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: AppColors.accentGreen.withAlpha(10),
+              color: tc.accent.withAlpha(10),
               border: Border.all(
-                color: AppColors.accentGreenDim.withAlpha(80),
+                color: tc.accentDim.withAlpha(80),
                 width: 1.5,
               ),
             ),
-            child: const Icon(
-              Icons.favorite_border,
-              color: AppColors.accentGreenDim,
-              size: 36,
-            ),
+            child: Icon(Icons.favorite_border, color: tc.accentDim, size: 36),
           ),
           const SizedBox(height: 20),
-          NeonText(
-            text: 'no_favorites'.tr,
-            fontSize: 18,
-          ),
+          NeonText(text: 'no_favorites'.tr, fontSize: 18, color: tc.accent),
           const SizedBox(height: 12),
           Text(
             'add_favorite'.tr,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
+            style: TextStyle(
+              color: tc.textSecondary,
               fontFamily: 'ShareTechMono',
               fontSize: 13,
             ),

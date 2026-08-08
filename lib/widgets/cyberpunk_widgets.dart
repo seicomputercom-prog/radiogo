@@ -4,7 +4,6 @@ import '../theme/app_colors.dart';
 
 // ======================== MATRIX RAIN PAINTER ========================
 
-/// Custom painter that renders falling green characters (Matrix rain effect).
 class MatrixRainPainter extends CustomPainter {
   final int columnCount;
   final double charHeight;
@@ -20,7 +19,7 @@ class MatrixRainPainter extends CustomPainter {
     List<String>? chars,
   })  : drops = drops ?? List.generate(40, (i) => Random().nextInt(30)),
         chars = chars ??
-            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#\$%^&*(){}[]|;:,.<>?/~`Ω∑∏∫'.split('');
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#\$%^&*(){}[]|;:,.<>?/~`'.split('');
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -28,43 +27,28 @@ class MatrixRainPainter extends CustomPainter {
       color: color,
       fontSize: charHeight * 0.7,
       fontFamily: 'ShareTechMono',
-      fontWeight: FontWeight.normal,
     );
-
-    final textPainter = TextPainter(
-      textDirection: TextDirection.ltr,
-    );
-
+    final textPainter = TextPainter(textDirection: TextDirection.ltr);
     final columnWidth = size.width / columnCount;
 
     for (int i = 0; i < columnCount; i++) {
       if (drops[i] < 0) continue;
-
       final x = i * columnWidth;
       final y = drops[i].toDouble() * charHeight;
-
       if (y < 0 || y > size.height) continue;
 
-      // Draw the character
       final char = chars[Random().nextInt(chars.length)];
       textPainter.text = TextSpan(text: char, style: textStyle);
       textPainter.layout();
 
-      // Vary opacity based on position
       final alpha = (0.8 - (y / size.height) * 0.6).clamp(0.2, 1.0);
       final paint = Paint()..color = color.withAlpha((alpha * 255).round());
       textPainter.paint(canvas, Offset(x, y));
 
-      // Draw a slightly dimmer trail character above
       if (drops[i] > 1) {
         final trailChar = chars[Random().nextInt(chars.length)];
         final trailPainter = TextPainter(
-          text: TextSpan(
-            text: trailChar,
-            style: textStyle.copyWith(
-              color: color.withAlpha(80),
-            ),
-          ),
+          text: TextSpan(text: trailChar, style: textStyle.copyWith(color: color.withAlpha(80))),
           textDirection: TextDirection.ltr,
         )..layout();
         trailPainter.paint(canvas, Offset(x, y - charHeight));
@@ -78,7 +62,6 @@ class MatrixRainPainter extends CustomPainter {
 
 // ======================== GLOWING BUTTON ========================
 
-/// A button with a neon green glow/shadow effect.
 class GlowingButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final Widget child;
@@ -100,7 +83,6 @@ class GlowingButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = glowColor ?? AppColors.accentGreen;
-
     return GestureDetector(
       onTap: isEnabled ? onPressed : null,
       child: AnimatedOpacity(
@@ -111,21 +93,10 @@ class GlowingButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: color.withAlpha(20),
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: color,
-              width: 1.5,
-            ),
+            border: Border.all(color: color, width: 1.5),
             boxShadow: [
-              BoxShadow(
-                color: color.withAlpha(60),
-                blurRadius: glowRadius,
-                spreadRadius: 1,
-              ),
-              BoxShadow(
-                color: color.withAlpha(30),
-                blurRadius: glowRadius * 2,
-                spreadRadius: 2,
-              ),
+              BoxShadow(color: color.withAlpha(60), blurRadius: glowRadius, spreadRadius: 1),
+              BoxShadow(color: color.withAlpha(30), blurRadius: glowRadius * 2, spreadRadius: 2),
             ],
           ),
           child: child,
@@ -137,7 +108,6 @@ class GlowingButton extends StatelessWidget {
 
 // ======================== NEON TEXT ========================
 
-/// Text with a green neon glow using multiple shadows.
 class NeonText extends StatelessWidget {
   final String text;
   final double fontSize;
@@ -161,7 +131,6 @@ class NeonText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final glowColor = color ?? AppColors.accentGreen;
-
     return Text(
       text,
       textAlign: textAlign,
@@ -173,11 +142,11 @@ class NeonText extends StatelessWidget {
         fontWeight: fontWeight,
         fontFamily: fontFamily,
         letterSpacing: 1.5,
-        shadows: const [
-          Shadow(color: AppColors.accentGreen, blurRadius: 4, offset: Offset(0, 0)),
-          Shadow(color: AppColors.accentGreen, blurRadius: 10, offset: Offset(0, 0)),
-          Shadow(color: AppColors.accentGreen, blurRadius: 20, offset: Offset(0, 0)),
-          Shadow(color: AppColors.accentGreenDim, blurRadius: 30, offset: Offset(0, 0)),
+        shadows: [
+          Shadow(color: glowColor, blurRadius: 4, offset: Offset.zero),
+          Shadow(color: glowColor, blurRadius: 10, offset: Offset.zero),
+          Shadow(color: glowColor, blurRadius: 20, offset: Offset.zero),
+          Shadow(color: glowColor.withAlpha(180), blurRadius: 30, offset: Offset.zero),
         ],
       ),
     );
@@ -186,16 +155,11 @@ class NeonText extends StatelessWidget {
 
 // ======================== CYBER LOADING INDICATOR ========================
 
-/// A green pulsing loading indicator with cyberpunk styling.
 class CyberLoadingIndicator extends StatefulWidget {
   final double size;
   final Color? color;
 
-  const CyberLoadingIndicator({
-    super.key,
-    this.size = 40,
-    this.color,
-  });
+  const CyberLoadingIndicator({super.key, this.size = 40, this.color});
 
   @override
   State<CyberLoadingIndicator> createState() => _CyberLoadingIndicatorState();
@@ -223,7 +187,6 @@ class _CyberLoadingIndicatorState extends State<CyberLoadingIndicator>
   @override
   Widget build(BuildContext context) {
     final color = widget.color ?? AppColors.accentGreen;
-
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -231,10 +194,7 @@ class _CyberLoadingIndicatorState extends State<CyberLoadingIndicator>
           width: widget.size,
           height: widget.size,
           child: CustomPaint(
-            painter: _HexagonPainter(
-              color: color,
-              progress: _controller.value,
-            ),
+            painter: _HexagonPainter(color: color, progress: _controller.value),
           ),
         );
       },
@@ -255,17 +215,12 @@ class _HexagonPainter extends CustomPainter {
     final radius = size.width / 2 - 2;
     const sides = 6;
 
-    // Draw rotating hexagon outline
     final paint = Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
       ..shader = SweepGradient(
-        colors: [
-          color.withAlpha(40),
-          color,
-          color.withAlpha(40),
-        ],
+        colors: [color.withAlpha(40), color, color.withAlpha(40)],
         startAngle: 0,
         endAngle: progress * 2 * pi,
       ).createShader(Rect.fromCircle(center: center, radius: radius));
@@ -282,15 +237,11 @@ class _HexagonPainter extends CustomPainter {
       }
     }
     path.close();
-
     canvas.drawPath(path, paint);
 
-    // Draw center dot
     canvas.drawCircle(
-      center,
-      3,
-      Paint()
-        ..color = color.withAlpha((128 + 127 * sin(progress * 2 * pi)).round().clamp(0, 255)),
+      center, 3,
+      Paint()..color = color.withAlpha((128 + 127 * sin(progress * 2 * pi)).round().clamp(0, 255)),
     );
   }
 
@@ -300,10 +251,8 @@ class _HexagonPainter extends CustomPainter {
 
 // ======================== SCANLINE OVERLAY ========================
 
-/// A subtle CRT scanline overlay for retro effect.
 class ScanlineOverlay extends StatelessWidget {
   final Widget child;
-
   const ScanlineOverlay({super.key, required this.child});
 
   @override
@@ -312,10 +261,7 @@ class ScanlineOverlay extends StatelessWidget {
       children: [
         child,
         IgnorePointer(
-          child: CustomPaint(
-            painter: _ScanlinePainter(),
-            size: Size.infinite,
-          ),
+          child: CustomPaint(painter: _ScanlinePainter(), size: Size.infinite),
         ),
       ],
     );
@@ -325,16 +271,9 @@ class ScanlineOverlay extends StatelessWidget {
 class _ScanlinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0x0A000000)
-      ..strokeWidth = 1;
-
+    final paint = Paint()..color = const Color(0x0A000000)..strokeWidth = 1;
     for (double y = 0; y < size.height; y += 3) {
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        paint,
-      );
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
   }
 
@@ -344,16 +283,12 @@ class _ScanlinePainter extends CustomPainter {
 
 // ======================== MATRIX RAIN ANIMATION WIDGET ========================
 
-/// A full-screen matrix rain animation widget.
 class MatrixRainWidget extends StatefulWidget {
   final Widget? child;
   final int columnCount;
+  final Color? color;
 
-  const MatrixRainWidget({
-    super.key,
-    this.child,
-    this.columnCount = 50,
-  });
+  const MatrixRainWidget({super.key, this.child, this.columnCount = 50, this.color});
 
   @override
   State<MatrixRainWidget> createState() => _MatrixRainWidgetState();
@@ -393,9 +328,9 @@ class _MatrixRainWidgetState extends State<MatrixRainWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final rainColor = widget.color ?? AppColors.accentGreen;
     return Stack(
       children: [
-        // Matrix rain background
         AnimatedBuilder(
           animation: const AlwaysStoppedAnimation(0),
           builder: (context, _) {
@@ -406,7 +341,7 @@ class _MatrixRainWidgetState extends State<MatrixRainWidget> {
                   painter: MatrixRainPainter(
                     columnCount: _columnCount,
                     drops: List.from(_drops),
-                    color: AppColors.accentGreen.withAlpha(60),
+                    color: rainColor.withAlpha(60),
                     charHeight: 18,
                   ),
                   size: Size.infinite,
@@ -415,11 +350,7 @@ class _MatrixRainWidgetState extends State<MatrixRainWidget> {
             );
           },
         ),
-        // Child content
-        if (widget.child != null)
-          Positioned.fill(
-            child: widget.child!,
-          ),
+        if (widget.child != null) Positioned.fill(child: widget.child!),
       ],
     );
   }

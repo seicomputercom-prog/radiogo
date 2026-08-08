@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'package:http/http.dart' as http;
 import '../models/radio_station.dart';
 import '../utils/constants.dart';
 import 'log_service.dart';
@@ -10,12 +10,6 @@ class RadioBrowserService {
 
   String get _baseUrl =>
       AppConstants.radioBrowserServers[_currentServerIndex];
-
-  HttpClient get _client {
-    return HttpClient()
-      ..connectionTimeout =
-          Duration(seconds: AppConstants.apiTimeoutSeconds);
-  }
 
   Future<List<RadioStation>> searchStations({
     String query = '',
@@ -83,10 +77,7 @@ class RadioBrowserService {
   Future<void> clickStation(String stationuuid) async {
     try {
       final uri = Uri.parse('$_baseUrl/url/$stationuuid');
-      final client = _client;
-      final request = await client.getUrl(uri);
-      await request.close();
-      client.close();
+      await http.get(uri).timeout(const Duration(seconds: 5));
     } catch (e) {
       LogService.I.w('API', 'clickStation failed for $stationuuid', error: e.toString());
     }
@@ -97,16 +88,17 @@ class RadioBrowserService {
       try {
         final base = AppConstants.radioBrowserServers[i];
         final uri = Uri.parse('$base/server/info');
-        final client = _client;
-        final request = await client.getUrl(uri);
-        final response = await request.close();
-        client.close();
+        final response = await http
+            .get(uri)
+            .timeout(const Duration(seconds: 8));
         if (response.statusCode == 200) {
-          final body = await response.transform(utf8.decoder).join();
+          final body = response.body;
           return jsonDecode(body) as Map<String, dynamic>;
         }
       } catch (e) {
-        LogService.I.w('API', 'Server ${AppConstants.radioBrowserServers[i]} info failed', error: e.toString());
+        LogService.I.w('API',
+            'Server ${AppConstants.radioBrowserServers[i]} info failed',
+            error: e.toString());
         continue;
       }
     }
@@ -117,35 +109,46 @@ class RadioBrowserService {
     String path, Map<String, String> params,
   ) async {
     final totalServers = AppConstants.radioBrowserServers.length;
+    final timeout = Duration(seconds: AppConstants.apiTimeoutSeconds);
+
     for (int attempt = 0; attempt < AppConstants.apiRetryCount + 1; attempt++) {
       for (int s = 0; s < totalServers; s++) {
         final idx = (_currentServerIndex + s) % totalServers;
         final base = AppConstants.radioBrowserServers[idx];
         try {
-          final uri = Uri.parse('$base$path').replace(queryParameters: params);
-          final client = _client;
-          final request = await client.getUrl(uri);
-          final response = await request.close();
-          client.close();
+          final uri =
+              Uri.parse('$base$path').replace(queryParameters: params);
+          final response =
+              await http.get(uri).timeout(timeout);
 
           if (response.statusCode == 200) {
-            final body = await response.transform(utf8.decoder).join();
+            final body = response.body;
             final List<dynamic> jsonList = jsonDecode(body);
             _currentServerIndex = idx;
-            LogService.I.i('API', 'Success: $base$path (${jsonList.length} stations, attempt $attempt)');
+            LogService.I.i('API',
+                'Success: $base$path (${jsonList.length} stations, attempt $attempt)');
             return jsonList
-                .map((json) => RadioStation.fromJson(json as Map<String, dynamic>))
+                .map((json) =>
+                    RadioStation.fromJson(json as Map<String, dynamic>))
                 .toList();
           } else {
-            LogService.I.w('API', 'HTTP ${response.statusCode} from $base$path');
+            LogService.I.w(
+                'API', 'HTTP ${response.statusCode} from $base$path');
           }
+        } on TimeoutException {
+          LogService.I.w('API',
+              'Timeout: $base$path (attempt $attempt.${s + 1}, ${timeout.inSeconds}s)');
+          continue;
         } catch (e) {
-          LogService.I.w('API', 'Failed: $base$path (attempt $attempt.${s + 1})', error: e.toString());
+          LogService.I.w('API',
+              'Failed: $base$path (attempt $attempt.${s + 1})',
+              error: e.toString());
           continue;
         }
       }
     }
-    LogService.I.e('API', 'All servers failed for $path after ${AppConstants.apiRetryCount + 1} retries');
+    LogService.I.e('API',
+        'All servers failed for $path after ${AppConstants.apiRetryCount + 1} retries');
     return [];
   }
 

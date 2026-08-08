@@ -2,42 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../controllers/player_controller.dart';
+import '../../controllers/settings_controller.dart';
 import '../../models/radio_station.dart';
 import '../../services/storage_service.dart';
 import '../../theme/app_colors.dart';
 import '../../routes/app_routes.dart';
 import '../../widgets/cyberpunk_widgets.dart';
 import '../../widgets/marquee_widget.dart';
+import '../../utils/constants.dart';
 
 class PlayerScreen extends GetView<PlayerController> {
   const PlayerScreen({super.key});
 
+  ThemeColors get _tc => Get.find<SettingsController>().currentTheme.value;
+
   @override
   Widget build(BuildContext context) {
+    final tc = _tc;
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: tc.background,
       appBar: AppBar(
         leading: GestureDetector(
           onTap: () => Get.back(),
-          child: const Icon(
-            Icons.arrow_back,
-            color: AppColors.accentGreen,
-          ),
+          child: Icon(Icons.arrow_back, color: tc.accent),
         ),
         title: Text(
           'now_playing'.tr,
-          style: const TextStyle(
-            color: AppColors.accentGreen,
+          style: TextStyle(
+            color: tc.accent,
             fontFamily: 'Orbitron',
             fontSize: 16,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
             shadows: [
-              Shadow(
-                color: AppColors.accentGreen,
-                blurRadius: 8,
-                offset: Offset(0, 0),
-              ),
+              Shadow(color: tc.accent, blurRadius: 8, offset: Offset.zero),
             ],
           ),
         ),
@@ -48,13 +46,9 @@ class PlayerScreen extends GetView<PlayerController> {
           preferredSize: const Size.fromHeight(1),
           child: Container(
             height: 1,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  AppColors.background,
-                  AppColors.accentGreen,
-                  AppColors.background,
-                ],
+                colors: [tc.background, tc.accent, tc.background],
               ),
             ),
           ),
@@ -62,11 +56,7 @@ class PlayerScreen extends GetView<PlayerController> {
       ),
       body: Obx(() {
         final station = controller.currentStation.value;
-
-        if (station == null) {
-          return _buildNoStationState();
-        }
-
+        if (station == null) return _buildNoStationState();
         return SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
@@ -85,6 +75,9 @@ class PlayerScreen extends GetView<PlayerController> {
                 _buildPlaybackControls(station),
                 const SizedBox(height: 40),
                 _buildStatusIndicator(),
+                const SizedBox(height: 24),
+                _buildCopyright(),
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -94,28 +87,18 @@ class PlayerScreen extends GetView<PlayerController> {
   }
 
   Widget _buildNoStationState() {
+    final tc = _tc;
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.radio,
-            color: AppColors.accentGreenDim,
-            size: 64,
-          ),
+          Icon(Icons.radio, color: tc.accentDim, size: 64),
           const SizedBox(height: 20),
-          NeonText(
-            text: 'stations'.tr,
-            fontSize: 20,
-          ),
+          NeonText(text: 'stations'.tr, fontSize: 20, color: tc.accent),
           const SizedBox(height: 12),
           Text(
             'search_placeholder'.tr,
-            style: const TextStyle(
-              color: AppColors.textSecondary,
-              fontFamily: 'ShareTechMono',
-              fontSize: 13,
-            ),
+            style: TextStyle(color: tc.textSecondary, fontFamily: 'ShareTechMono', fontSize: 13),
           ),
         ],
       ),
@@ -123,74 +106,41 @@ class PlayerScreen extends GetView<PlayerController> {
   }
 
   Widget _buildLargeFavicon(String url) {
+    final tc = _tc;
     if (url.isEmpty) {
       return Container(
-        width: 200,
-        height: 200,
+        width: 200, height: 200,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.surface,
-          border: Border.all(
-            color: AppColors.accentGreen.withAlpha(100),
-            width: 3,
-          ),
+          color: tc.surface,
+          border: Border.all(color: tc.accent.withAlpha(100), width: 3),
           boxShadow: [
-            BoxShadow(
-              color: AppColors.accentGreen.withAlpha(30),
-              blurRadius: 30,
-              spreadRadius: 5,
-            ),
+            BoxShadow(color: tc.accent.withAlpha(30), blurRadius: 30, spreadRadius: 5),
           ],
         ),
-        child: const Icon(
-          Icons.radio,
-          color: AppColors.accentGreenDim,
-          size: 80,
-        ),
+        child: Icon(Icons.radio, color: tc.accentDim, size: 80),
       );
     }
-
     return Container(
-      width: 200,
-      height: 200,
+      width: 200, height: 200,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(
-          color: AppColors.accentGreen.withAlpha(120),
-          width: 3,
-        ),
+        border: Border.all(color: tc.accent.withAlpha(120), width: 3),
         boxShadow: [
-          BoxShadow(
-            color: AppColors.accentGreen.withAlpha(40),
-            blurRadius: 30,
-            spreadRadius: 5,
-          ),
-          BoxShadow(
-            color: AppColors.accentGreen.withAlpha(20),
-            blurRadius: 50,
-            spreadRadius: 10,
-          ),
+          BoxShadow(color: tc.accent.withAlpha(40), blurRadius: 30, spreadRadius: 5),
+          BoxShadow(color: tc.accent.withAlpha(20), blurRadius: 50, spreadRadius: 10),
         ],
       ),
       child: ClipOval(
         child: CachedNetworkImage(
-          imageUrl: url,
-          fit: BoxFit.cover,
-          width: 200,
-          height: 200,
+          imageUrl: url, fit: BoxFit.cover, width: 200, height: 200,
           placeholder: (context, url) => Container(
-            color: AppColors.surface,
-            child: const Center(
-              child: CyberLoadingIndicator(size: 50),
-            ),
+            color: tc.surface,
+            child: Center(child: CyberLoadingIndicator(size: 50, color: tc.accent)),
           ),
           errorWidget: (context, url, error) => Container(
-            color: AppColors.surface,
-            child: const Icon(
-              Icons.radio,
-              color: AppColors.accentGreenDim,
-              size: 80,
-            ),
+            color: tc.surface,
+            child: Icon(Icons.radio, color: tc.accentDim, size: 80),
           ),
         ),
       ),
@@ -198,24 +148,16 @@ class PlayerScreen extends GetView<PlayerController> {
   }
 
   Widget _buildStationName(String name) {
+    final tc = _tc;
     return SizedBox(
       height: 30,
       child: Center(
         child: SimpleMarquee(
           text: name,
-          style: const TextStyle(
-            color: AppColors.textPrimary,
-            fontFamily: 'Orbitron',
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-            shadows: [
-              Shadow(
-                color: AppColors.accentGreen,
-                blurRadius: 10,
-                offset: Offset(0, 0),
-              ),
-            ],
+          style: TextStyle(
+            color: tc.textPrimary, fontFamily: 'Orbitron', fontSize: 22,
+            fontWeight: FontWeight.bold, letterSpacing: 1,
+            shadows: [Shadow(color: tc.accent, blurRadius: 10, offset: Offset.zero)],
           ),
         ),
       ),
@@ -223,28 +165,19 @@ class PlayerScreen extends GetView<PlayerController> {
   }
 
   Widget _buildNowPlayingTitle() {
+    final tc = _tc;
     return Obx(() {
       final title = controller.nowPlayingTitle.value;
       final station = controller.currentStation.value;
-      final isStillStationName =
-          station != null && title == station.name;
-
+      final isStillStationName = station != null && title == station.name;
       return SizedBox(
         height: 22,
         child: Center(
           child: SimpleMarquee(
             text: isStillStationName ? '' : title,
-            style: const TextStyle(
-              color: AppColors.neonGreen,
-              fontFamily: 'ShareTechMono',
-              fontSize: 14,
-              shadows: [
-                Shadow(
-                  color: AppColors.neonGreen,
-                  blurRadius: 6,
-                  offset: Offset(0, 0),
-                ),
-              ],
+            style: TextStyle(
+              color: tc.accent, fontFamily: 'ShareTechMono', fontSize: 14,
+              shadows: [Shadow(color: tc.accent, blurRadius: 6, offset: Offset.zero)],
             ),
           ),
         ),
@@ -253,51 +186,34 @@ class PlayerScreen extends GetView<PlayerController> {
   }
 
   Widget _buildLiveBadge() {
+    final tc = _tc;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.accentGreen.withAlpha(20),
+            color: tc.accent.withAlpha(20),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: AppColors.accentGreen,
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.accentGreen.withAlpha(30),
-                blurRadius: 8,
-              ),
-            ],
+            border: Border.all(color: tc.accent, width: 1),
+            boxShadow: [BoxShadow(color: tc.accent.withAlpha(30), blurRadius: 8)],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.accentGreen,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.accentGreen,
-                      blurRadius: 6,
-                    ),
-                  ],
+                width: 8, height: 8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle, color: tc.accent,
+                  boxShadow: [BoxShadow(color: tc.accent, blurRadius: 6)],
                 ),
               ),
               const SizedBox(width: 6),
               Text(
                 'live'.tr,
-                style: const TextStyle(
-                  color: AppColors.accentGreen,
-                  fontFamily: 'Orbitron',
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 2,
+                style: TextStyle(
+                  color: tc.accent, fontFamily: 'Orbitron', fontSize: 11,
+                  fontWeight: FontWeight.bold, letterSpacing: 2,
                 ),
               ),
             ],
@@ -308,93 +224,59 @@ class PlayerScreen extends GetView<PlayerController> {
   }
 
   Widget _buildStationInfo(RadioStation station) {
+    final tc = _tc;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: AppColors.divider,
-          width: 1,
-        ),
+        color: tc.surface, borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: tc.divider, width: 1),
       ),
       child: Column(
         children: [
-          if (station.country.isNotEmpty)
-            _infoRow(Icons.location_on, station.country),
-          if (station.country.isNotEmpty && station.displayTags.isNotEmpty)
+          if (station.country.isNotEmpty) _infoRow(Icons.location_on, station.country),
+          if (station.country.isNotEmpty && station.displayTags.isNotEmpty) const SizedBox(height: 6),
+          if (station.displayTags.isNotEmpty) _infoRow(Icons.tag, station.displayTags),
+          if ((station.displayTags.isNotEmpty || station.country.isNotEmpty) && station.displayBitrate.isNotEmpty)
             const SizedBox(height: 6),
-          if (station.displayTags.isNotEmpty)
-            _infoRow(Icons.tag, station.displayTags),
-          if ((station.displayTags.isNotEmpty ||
-                  station.country.isNotEmpty) &&
-              station.displayBitrate.isNotEmpty)
-            const SizedBox(height: 6),
-          if (station.displayBitrate.isNotEmpty)
-            _infoRow(Icons.speed, station.displayBitrate),
+          if (station.displayBitrate.isNotEmpty) _infoRow(Icons.speed, station.displayBitrate),
         ],
       ),
     );
   }
 
   Widget _infoRow(IconData icon, String text) {
+    final tc = _tc;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(icon, color: AppColors.accentGreenDim, size: 16),
+        Icon(icon, color: tc.accentDim, size: 16),
         const SizedBox(width: 8),
-        Text(
-          text,
-          style: const TextStyle(
-            color: AppColors.textSecondary,
-            fontFamily: 'ShareTechMono',
-            fontSize: 12,
-          ),
-        ),
+        Text(text, style: TextStyle(color: tc.textSecondary, fontFamily: 'ShareTechMono', fontSize: 12)),
       ],
     );
   }
 
   Widget _buildPlaybackControls(RadioStation station) {
     final storage = Get.find<StorageService>();
-
+    final tc = _tc;
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Stop button
-        _controlButton(
-          icon: Icons.stop,
-          onTap: () => controller.stop(),
-          size: 50,
-          iconSize: 24,
-          glowIntensity: 0.3,
-        ),
+        _controlButton(icon: Icons.stop, onTap: () => controller.stop(), size: 50, iconSize: 24, glowIntensity: 0.3, tc: tc),
         const SizedBox(width: 32),
-        // Play/Pause button (large)
         Obx(() {
           return _controlButton(
-            icon: controller.isPlaying.value
-                ? Icons.pause
-                : Icons.play_arrow,
-            onTap: () => controller.togglePlayPause(),
-            size: 72,
-            iconSize: 36,
-            glowIntensity: 1.0,
+            icon: controller.isPlaying.value ? Icons.pause : Icons.play_arrow,
+            onTap: () => controller.togglePlayPause(), size: 72, iconSize: 36, glowIntensity: 1.0, tc: tc,
           );
         }),
         const SizedBox(width: 32),
-        // Favorite button
         Obx(() {
           final isFav = storage.isFavorite(station.stationuuid);
           return _controlButton(
             icon: isFav ? Icons.favorite : Icons.favorite_border,
-            onTap: () {
-              storage.toggleFavorite(station);
-            },
-            size: 50,
-            iconSize: 24,
-            glowIntensity: 0.3,
-            iconColor: isFav ? AppColors.errorRed : AppColors.accentGreen,
+            onTap: () => storage.toggleFavorite(station), size: 50, iconSize: 24, glowIntensity: 0.3,
+            iconColor: isFav ? AppColors.errorRed : tc.accent, tc: tc,
           );
         }),
       ],
@@ -408,66 +290,56 @@ class PlayerScreen extends GetView<PlayerController> {
     required double iconSize,
     required double glowIntensity,
     Color? iconColor,
+    required ThemeColors tc,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 150),
-        width: size,
-        height: size,
+        width: size, height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: AppColors.accentGreen.withAlpha(20),
+          color: tc.accent.withAlpha(20),
           border: Border.all(
-            color: AppColors.accentGreen.withAlpha(
-              (150 * glowIntensity).round().clamp(50, 200),
-            ),
+            color: tc.accent.withAlpha((150 * glowIntensity).round().clamp(50, 200)),
             width: glowIntensity > 0.5 ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: AppColors.accentGreen.withAlpha(
-                (80 * glowIntensity).round().clamp(10, 80),
-              ),
+              color: tc.accent.withAlpha((80 * glowIntensity).round().clamp(10, 80)),
               blurRadius: (20 * glowIntensity).round().clamp(4, 25).toDouble(),
               spreadRadius: (4 * glowIntensity).round().clamp(0, 6).toDouble(),
             ),
           ],
         ),
-        child: Icon(
-          icon,
-          color: iconColor ?? AppColors.accentGreen,
-          size: iconSize,
-        ),
+        child: Icon(icon, color: iconColor ?? tc.accent, size: iconSize),
       ),
     );
   }
 
   Widget _buildStatusIndicator() {
+    final tc = _tc;
     return Obx(() {
       if (controller.isLoading.value) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const SizedBox(
-              width: 16,
-              height: 16,
-              child: CyberLoadingIndicator(size: 16),
-            ),
+            SizedBox(width: 16, height: 16, child: CyberLoadingIndicator(size: 16, color: tc.accent)),
             const SizedBox(width: 8),
-            Text(
-              'buffering'.tr,
-              style: const TextStyle(
-                color: AppColors.accentGreenDim,
-                fontFamily: 'ShareTechMono',
-                fontSize: 12,
-              ),
-            ),
+            Text('buffering'.tr, style: TextStyle(color: tc.accentDim, fontFamily: 'ShareTechMono', fontSize: 12)),
           ],
         );
       }
-
       return const SizedBox.shrink();
     });
+  }
+
+  Widget _buildCopyright() {
+    final tc = _tc;
+    return Text(
+      AppConstants.copyrightShort,
+      style: TextStyle(color: tc.textSecondary, fontFamily: 'ShareTechMono', fontSize: 9, letterSpacing: 0.5),
+      textAlign: TextAlign.center,
+    );
   }
 }
