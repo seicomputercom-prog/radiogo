@@ -32,6 +32,7 @@ class SearchScreen extends GetView<SearchController> {
           Expanded(
             child: TextField(
               onChanged: controller.onSearchChanged,
+              textInputAction: TextInputAction.search,
               style: TextStyle(
                 color: tc.textPrimary,
                 fontFamily: 'ShareTechMono',
@@ -57,7 +58,6 @@ class SearchScreen extends GetView<SearchController> {
                   }
                   return const SizedBox.shrink();
                 }),
-                textInputAction: TextInputAction.search,
               ),
             ),
           ),

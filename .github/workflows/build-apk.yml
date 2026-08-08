@@ -52,6 +52,7 @@ jobs:
 
       - name: Build APK
         run: |
+          set -o pipefail
           cd android && chmod +x gradlew && cd ..
           flutter build apk \
             --${{ github.event.inputs.build_mode || 'release' }} \
