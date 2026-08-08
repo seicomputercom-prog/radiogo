@@ -4,7 +4,7 @@ import '../models/radio_station.dart';
 import '../services/radio_browser_service.dart';
 
 class SearchController extends GetxController {
-  late final RadioBrowserService _browserService;
+  RadioBrowserService? _browserService;
 
   final RxString searchQuery = ''.obs;
   final RxList<RadioStation> searchResults = <RadioStation>[].obs;
@@ -20,16 +20,18 @@ class SearchController extends GetxController {
     super.onInit();
     try {
       _browserService = Get.find<RadioBrowserService>();
-    } catch (e) {
-      // Service not ready yet, will be resolved lazily
+    } catch (_) {
+      // Service not ready yet, will be resolved lazily via _service getter
     }
   }
 
   RadioBrowserService get _service {
+    if (_browserService != null) return _browserService!;
     try {
-      return Get.find<RadioBrowserService>();
+      _browserService = Get.find<RadioBrowserService>();
+      return _browserService!;
     } catch (_) {
-      return _browserService;
+      throw StateError('RadioBrowserService not available');
     }
   }
 

@@ -58,16 +58,23 @@ jobs:
             --target-platform ${{ github.event.inputs.target_platform || 'android-arm64' }} \
             --build-number=${{ github.run_number }} 2>&1 | tee /tmp/build_log.txt
           echo "BUILD_EXIT_CODE=$?" >> $GITHUB_ENV
-        continue-on-error: true
 
       - name: Show build log on failure
         if: always()
         run: |
-          echo "=== Build exit code check ==="
+          echo "### Build Output" >> $GITHUB_STEP_SUMMARY
           if [ -f /tmp/build_log.txt ]; then
-            echo "=== Last 100 lines of build log ==="
-            tail -100 /tmp/build_log.txt
+            echo "<details><summary>Build log (last 150 lines)</summary>" >> $GITHUB_STEP_SUMMARY
+            echo '' >> $GITHUB_STEP_SUMMARY
+            echo '\`\`\`' >> $GITHUB_STEP_SUMMARY
+            tail -150 /tmp/build_log.txt >> $GITHUB_STEP_SUMMARY
+            echo '\`\`\`' >> $GITHUB_STEP_SUMMARY
+            echo '</details>' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No build log file found" >> $GITHUB_STEP_SUMMARY
           fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**BUILD_EXIT_CODE: \\$BUILD_EXIT_CODE**" >> $GITHUB_STEP_SUMMARY
 
       - name: Locate and prepare APK
         run: |
