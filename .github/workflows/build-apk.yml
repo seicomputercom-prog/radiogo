@@ -46,14 +46,28 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Analyze code
+        run: flutter analyze --no-fatal-infos 2>&1 | head -80
+        continue-on-error: true
+
       - name: Build APK
         run: |
           cd android && chmod +x gradlew && cd ..
           flutter build apk \
             --${{ github.event.inputs.build_mode || 'release' }} \
             --target-platform ${{ github.event.inputs.target_platform || 'android-arm64' }} \
-            --build-number=${{ github.run_number }}
+            --build-number=${{ github.run_number }} 2>&1 | tee /tmp/build_log.txt
+          echo "BUILD_EXIT_CODE=$?" >> $GITHUB_ENV
         continue-on-error: true
+
+      - name: Show build log on failure
+        if: always()
+        run: |
+          echo "=== Build exit code check ==="
+          if [ -f /tmp/build_log.txt ]; then
+            echo "=== Last 100 lines of build log ==="
+            tail -100 /tmp/build_log.txt
+          fi
 
       - name: Locate and prepare APK
         run: |
